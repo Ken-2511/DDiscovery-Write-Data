@@ -1,5 +1,7 @@
 # DDiscovery-Write-Data 使用说明
 
+[English README](./README_en.md)
+
 本项目用于通过 Digilent Digital Discovery 向数字设备写入自定义数据序列。所有配置参数和数据位均通过 `config.csv` 文件进行管理。
 
 ## 依赖环境
