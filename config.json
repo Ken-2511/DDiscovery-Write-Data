@@ -1,0 +1,36 @@
+{
+	"channel 1": {
+		"clock_channel": 24,
+		"data_channel": 25,
+		"resetn_channel": 26,
+		"frequency": 100,
+		"num_cycles_to_reset": 2,
+		"reset_idle_state": "high",
+		"repeats": 2,
+		"length_of_data": 4,
+		"data": {
+			"data_0": 0,
+			"data_1": 1,
+			"data_2": 0,
+			"data_3": 1
+		}
+	},
+	"channel 2": {
+		"clock_channel": 27,
+		"data_channel": 28,
+		"resetn_channel": 29,
+		"frequency": 100,
+		"num_cycles_to_reset": 2,
+		"reset_idle_state": "z",
+		"repeats": 2,
+		"length_of_data": 6,
+		"data": {
+			"hello...": 1,
+			"data_1": 1,
+			"data_2": 0,
+			"data_3": 1,
+			"data_4": 0,
+			"data_5": 1
+		}
+	}
+}

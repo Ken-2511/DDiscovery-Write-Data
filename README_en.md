@@ -1,78 +1,76 @@
 # DDiscovery-Write-Data User Guide
 
-This project is designed to write custom digital data sequences to devices using the Digilent Digital Discovery. All configuration parameters and data bits are managed via the `config.csv` file.
+This project writes custom digital data sequences to devices using Digilent Digital Discovery. All configuration parameters and data bits are managed via a single `config.json` file, supporting multiple named profiles.
 
 ## Requirements
 
 - Python 3.7 or above
 - [dwfpy](https://github.com/mariusgreuel/dwfpy)
-  
-  Installation:
-  ```
+  ```powershell
   pip install dwfpy
   ```
 
 ## File Structure
 
-- `main.py`: Main program, responsible for reading configuration and data, and writing to the device
-- `config.csv`: Configuration parameters and data bits (to be edited by the user)
+- `main.py`: Main program to read the JSON configuration and write to the device
+- `config.json`: JSON file defining one or more write profiles
+- `README.md`: Chinese user guide
+- `README_en.md`: English user guide
 
-## config.csv Format
+## config.json Format
 
-Example:
+`config.json` is a JSON object where each key is a named profile. Example:
 
+```json
+{
+  "profile1": {
+    "frequency": 100,
+    "num_cycles_to_reset": 2,
+    "length_of_data": 16,
+    "repeats": 2,
+    "clock_channel": 24,
+    "data_channel": 25,
+    "resetn_channel": 26,
+    "reset_idle_state": "initial",
+    "data": {
+      "bit1": 1,
+      "bit2": 0,
+      ...
+      "bit16": 1
+    }
+  },
+  "profile2": {
+    // additional profiles
+  }
+}
 ```
-key,value
-frequency,100
-num_cycles_to_reset,2
-length_of_data,16
-repeats,2
-clock_channel,24
-data_channel,25
-resetn_channel,26
-splitter,========================
-bitA,1
-bitB,0
-bitC,1
-bitD,0
-...
-```
 
-### Parameter Descriptions
+### Field Descriptions
 
-- `frequency`: Clock signal frequency in Hz (e.g., 100 means 100Hz)
-- `num_cycles_to_reset`: Number of clock cycles the reset signal stays low before writing data
-- `length_of_data`: Number of data bits per write (must match the number of data bits below)
-- `repeats`: Number of times to repeat the data sequence (writes the same sequence multiple times)
-- `clock_channel`: Output channel number for the clock signal (typically 24~39 on Digital Discovery)
-- `data_channel`: Output channel number for the data bits (typically 24~39)
-- `resetn_channel`: Output channel number for the reset signal (typically 24~39)
-- `splitter`: Separator row, content can be arbitrary, used to separate parameters from data bits
-
-### Data Bits
-
-- Every row after the `splitter` is treated as a data bit. The key can be any name (does not need to start with `data_`), and the value must be 0 or 1.
-- The number of data bits must match the `length_of_data` parameter, otherwise the program will report an error.
+- `frequency`: Clock signal frequency in Hz
+- `num_cycles_to_reset`: Number of clock cycles the reset signal stays low before data write
+- `length_of_data`: Number of data bits per write (must match the count of `data` entries)
+- `repeats`: Number of times to repeat the data sequence
+- `clock_channel`: Channel number for clock output (24–39)
+- `data_channel`: Channel number for data output (24–39)
+- `resetn_channel`: Channel number for reset output (24–39)
+- `reset_idle_state`: Idle state for reset line; one of `"initial"`, `"low"`, `"high"`, `"z"`
+- `data`: Object mapping bit names to values (0 or 1)
 
 ## Usage
 
-1. **Edit `config.csv`**  
-   Fill in the parameters and data bits as described above. Data bit keys can be named arbitrarily, as long as the value is 0 or 1.
-
-2. **Connect the Digital Discovery device**
-
-3. **Run the main program**  
-   In the terminal, execute:
-   ```
+1. Edit `config.json` and define one or more profiles as shown above.
+2. Connect the Digilent Digital Discovery device.
+3. Run the main script:
+   ```powershell
    python main.py
    ```
-
-4. **Follow the prompts**  
-   Each time you press Enter, the data will be written to the device.
+4. Follow the prompts:
+   - Press Enter to write all profiles’ data sequences to the device.
+   - Enter `q` and press Enter to exit.
 
 ## Notes
 
-- All parameters must be set in `config.csv`. The `config` dictionary in the code is only a placeholder.
-- The number of data bits must match the `length_of_data` parameter.
-- To change the write frequency, channels, or other parameters, modify `config.csv` directly.
-- Data bit keys can be customized and do not need to start with `data_`.
+- Ensure `config.json` is valid JSON; the program will report field-specific errors if not.
+- Channel numbers must be unique and within 24–39.
+- Data values in `data` must be either 0 or 1.
