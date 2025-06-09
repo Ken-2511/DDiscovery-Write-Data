@@ -85,7 +85,7 @@ def write_to_device(device):
 	try:
 		configs_sanity_check(configs)
 	except (TypeError, KeyError, ValueError) as e:
-		print(f"Json 文件出错啦！ {e}")
+		print(f"\033[91mJson 文件出错啦！ {e}\033[0m")
 		return
 	"""将配置写入设备"""
 	# setup digital output
