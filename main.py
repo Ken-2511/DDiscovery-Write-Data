@@ -88,12 +88,12 @@ def write_to_device(device):
 		print(f"Json 文件出错啦！ {e}")
 		return
 	"""将配置写入设备"""
+	# setup digital output
+	pattern = device.digital_output
 	for key, config in configs.items():
 		print(f"Writing to device with configuration: {key}")
 		if len(config['data']) != config['length_of_data']:
 			raise ValueError(f"Data length mismatch: expected {config['length_of_data']}, got {len(config['data'])}")
-		# setup digital output
-		pattern = device.digital_output
 		# clock
 		clock_channel = config['clock_channel'] - 24
 		clock_repetition = config['num_cycles_to_reset'] * 2 + config['length_of_data'] * config['repeats'] * 2
