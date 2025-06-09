@@ -26,7 +26,7 @@ def configs_sanity_check(configs):
 		# Required fields
 		required = (
 			"clock_channel", "data_channel", "resetn_channel",
-			"frequency", "num_cycles_to_reset", "reset_idle_state",
+			"frequency", "num_cycles_to_reset", "reset_mode",
 			"repeats", "length_of_data", "data"
 		)
 		for field in required:
@@ -56,12 +56,12 @@ def configs_sanity_check(configs):
 		if not isinstance(num_reset, int) or num_reset < 0:
 			raise ValueError(f"'{name}.num_cycles_to_reset' must be a non-negative integer, got {num_reset}")
 
-		# Idle state
-		idle = cfg["reset_idle_state"]
-		valid_idle_strs = ("initial", "low", "high", "z")
+		# Reset mode
+		idle = cfg["reset_mode"]
+		valid_idle_strs = ("low", "high")
 		if not (isinstance(idle, str) and idle.lower() in valid_idle_strs):
 			raise ValueError(
-			f"'{name}.reset_idle_state' must be one of 'initial', 'low', 'high', 'z', got {idle!r}"
+			f"'{name}.reset_mode' must be one of 'low', 'high', got {idle!r}"
 			)
 
 		# Repeats
@@ -110,8 +110,11 @@ def write_to_device(device):
 		pattern[data_channel].setup_custom(config['frequency'], data, repetition=1)
 		# resetn
 		resetn_channel = config['resetn_channel'] - 24
-		reset_data = [0] * config['num_cycles_to_reset'] + [1] * config['length_of_data'] * config['repeats']
-		pattern[resetn_channel].setup_custom(config['frequency'], reset_data, repetition=1, idle_state=config['reset_idle_state'])
+		active_bit = 1 if config['reset_mode'].lower() == 'high' else 0  # active bit is 1 for high reset mode, 0 for low reset mode
+		idle_bit = 0 if active_bit == 1 else 1
+		idle_state = "low" if active_bit == 1 else "high"
+		reset_data = [active_bit] * config['num_cycles_to_reset'] + [idle_bit] * config['length_of_data'] * config['repeats']
+		pattern[resetn_channel].setup_custom(config['frequency'], reset_data, repetition=1, idle_state=idle_state)
 		# print
 		print(f"writing the following data  to pin {config['data_channel']}: {data}")
 		print(f"writing the following reset to pin {config['resetn_channel']}: {reset_data}")

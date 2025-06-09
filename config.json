@@ -5,7 +5,7 @@
 		"resetn_channel": 26,
 		"frequency": 100,
 		"num_cycles_to_reset": 2,
-		"reset_idle_state": "high",
+		"reset_mode": "low",
 		"repeats": 2,
 		"length_of_data": 4,
 		"data": {
@@ -21,7 +21,7 @@
 		"resetn_channel": 29,
 		"frequency": 100,
 		"num_cycles_to_reset": 2,
-		"reset_idle_state": "z",
+		"reset_mode": "low",
 		"repeats": 2,
 		"length_of_data": 6,
 		"data": {
