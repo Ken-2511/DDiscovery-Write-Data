@@ -1,3 +1,7 @@
+# Settings
+supply_voltage = 2.5  # V
+config_file_name = "config.json"  # JSON 配置文件名
+
 import dwfpy as dwf
 
 def read_configs_from_json(file_path):
@@ -81,7 +85,7 @@ def configs_sanity_check(configs):
 
 def write_to_device(device):
 	# configurations
-	configs = read_configs_from_json('config.json')
+	configs = read_configs_from_json(config_file_name)
 	try:
 		configs_sanity_check(configs)
 	except (TypeError, KeyError, ValueError) as e:
@@ -90,6 +94,7 @@ def write_to_device(device):
 	"""将配置写入设备"""
 	# setup digital output
 	pattern = device.digital_output
+	device.supplies.digital.voltage = supply_voltage
 	for key, config in configs.items():
 		print(f"Writing to device with configuration: {key}")
 		if len(config['data']) != config['length_of_data']:
