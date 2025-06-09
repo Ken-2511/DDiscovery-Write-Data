@@ -1,31 +1,29 @@
-# DDiscovery-Write-Data 使用说明
+# DDiscovery-Write-Data User Guide
 
-[English README](./README_en.md)
+This project writes custom digital data sequences to devices using Digilent Digital Discovery. All configuration parameters and data bits are managed via a single `config.json` file, supporting multiple named profiles.
 
-本项目用于通过 Digilent Digital Discovery 向数字设备写入自定义数据序列。所有配置参数和数据位均通过 `config.json` 管理，支持多个命名配置项。
+## Requirements
 
-## 依赖环境
-
-- Python 3.7 及以上
+- Python 3.7 or above
 - [dwfpy](https://github.com/mariusgreuel/dwfpy)
   ```powershell
   pip install dwfpy
   ```
 
-## 文件结构
+## File Structure
 
-- `main.py`：主程序，负责读取配置文件并写入设备
-- `config.json`：配置文件，使用 JSON 格式定义一个或多个写入配置
-- `README.md`：中文使用说明
-- `README_en.md`：英文使用说明
+- `main.py`: Main program to read the JSON configuration and write to the device
+- `config.json`: JSON file defining one or more write profiles
+- `README.md`: Chinese user guide
+- `README_en.md`: English user guide
 
-## config.json 格式说明
+## config.json Format
 
-config.json 为一个 JSON 对象，每个键对应一个写入配置。示例：
+`config.json` is a JSON object where each key is a named profile. Example:
 
 ```json
 {
-  "config1": {
+  "profile1": {
     "frequency": 100,
     "num_cycles_to_reset": 2,
     "length_of_data": 16,
@@ -41,38 +39,38 @@ config.json 为一个 JSON 对象，每个键对应一个写入配置。示例�
       "bit16": 1
     }
   },
-  "config2": {
-    ... // 可定义更多配置
+  "profile2": {
+    // additional profiles
   }
 }
 ```
 
-### 字段说明
+### Field Descriptions
 
-- `frequency`：时钟信号频率，单位 Hz
-- `num_cycles_to_reset`：复位信号保持低电平的时钟周期数
-- `length_of_data`：单次写入的数据位长度，需与 `data` 对象的键值对数量一致
-- `repeats`：数据序列重复写入次数
-- `clock_channel`：时钟输出通道号（24~39）
-- `data_channel`：数据输出通道号（24~39）
-- `resetn_channel`：复位输出通道号（24~39）
-- `reset_idle_state`：复位线空闲状态，可选 `"initial"`、`"low"`、`"high"`、`"z"`
-- `data`：一个对象，键为数据位名称，值为 0 或 1
+- `frequency`: Clock signal frequency in Hz
+- `num_cycles_to_reset`: Number of clock cycles the reset signal stays low before data write
+- `length_of_data`: Number of data bits per write (must match the count of `data` entries)
+- `repeats`: Number of times to repeat the data sequence
+- `clock_channel`: Channel number for clock output (24–39)
+- `data_channel`: Channel number for data output (24–39)
+- `resetn_channel`: Channel number for reset output (24–39)
+- `reset_idle_state`: Idle state for reset line; one of `"initial"`, `"low"`, `"high"`, `"z"`
+- `data`: Object mapping bit names to values (0 or 1)
 
-## 使用方法
+## Usage
 
-1. 编辑 `config.json`，根据示例添加一个或多个配置项
-2. 连接 Digilent Digital Discovery 设备
-3. 运行主程序：
+1. Edit `config.json` and define one or more profiles as shown above.
+2. Connect the Digilent Digital Discovery device.
+3. Run the main script:
    ```powershell
    python main.py
    ```
-4. 按提示操作：  
-   - 按回车写入所有配置项中的数据序列  
-   - 输入 `q` 并回车退出程序
+4. Follow the prompts:
+   - Press Enter to write all profiles’ data sequences to the device.
+   - Enter `q` and press Enter to exit.
 
-## 注意事项
+## Notes
 
-- 确保 JSON 文件格式正确，否则程序会报错并提示具体字段问题
-- 通道号不得重复且需在 24~39 范围内
-- `data` 内的值仅能为 0 或 1
+- Ensure `config.json` is valid JSON; the program will report field-specific errors if not.
+- Channel numbers must be unique and within 24–39.
+- Data values in `data` must be either 0 or 1.

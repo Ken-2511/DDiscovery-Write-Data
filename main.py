@@ -1,29 +1,29 @@
 # Settings
 supply_voltage = 2.5  # V
-config_file_name = "config.json"  # JSON 配置文件名
+config_file_name = "config.json"  # JSON config file name
 
 import dwfpy as dwf
 
 def read_configs_from_json(file_path):
-	"""从JSON文件读取配置参数和数据"""
+	"""Read configuration parameters and data from a JSON file"""
 	import json
 	with open(file_path, 'r') as file:
 		configs = json.load(file)
 	return configs
 
 def configs_sanity_check(configs):
-	"""对读取的 configs 做全面的校验，确保所有字段存在且符合预期类型及约束"""
+	"""Perform comprehensive validation on configs to ensure all fields exist and meet expected types and constraints"""
 	if not isinstance(configs, dict):
-		raise TypeError(f"configs 应该是 dict 类型，收到 {type(configs).__name__}")
+		raise TypeError(f"configs should be of type dict, got {type(configs).__name__}")
 	used_channels = set()
 	for name, cfg in configs.items():
-		# 名称校验
+		# Name validation
 		if not isinstance(name, str):
-			raise TypeError(f"配置项的 key 应该是字符串，收到 {type(name).__name__}：{name}")
+			raise TypeError(f"The key of a config item should be a string, got {type(name).__name__}: {name}")
 		if not isinstance(cfg, dict):
-			raise TypeError(f"配置 '{name}' 应该是 dict 类型，收到 {type(cfg).__name__}")
+			raise TypeError(f"Config '{name}' should be of type dict, got {type(cfg).__name__}")
 
-		# 必须字段
+		# Required fields
 		required = (
 			"clock_channel", "data_channel", "resetn_channel",
 			"frequency", "num_cycles_to_reset", "reset_idle_state",
@@ -31,57 +31,57 @@ def configs_sanity_check(configs):
 		)
 		for field in required:
 			if field not in cfg:
-				raise KeyError(f"配置 '{name}' 缺少必填字段 '{field}'")
+				raise KeyError(f"Config '{name}' is missing required field '{field}'")
 
-		# 通道号校验，必须互不重复且为整数
+		# Channel number validation: must be unique and integer
 		for ch_field in ("clock_channel", "data_channel", "resetn_channel"):
 			ch = cfg[ch_field]
 			if not isinstance(ch, int):
-				raise TypeError(f"'{name}.{ch_field}' 必须是 int，收到 {type(ch).__name__}")
+				raise TypeError(f"'{name}.{ch_field}' must be int, got {type(ch).__name__}")
 			if ch < 0 or ch > 63:
-				raise ValueError(f"'{name}.{ch_field}'={ch} 超出 0–63 可用范围")
+				raise ValueError(f"'{name}.{ch_field}'={ch} is out of the valid range 0–63")
 			if ch in used_channels:
-				raise ValueError(f"通道号 {ch} 在多个配置中重复使用")
+				raise ValueError(f"Channel number {ch} is used in multiple configs")
 			used_channels.add(ch)
 
-		# 频率
+		# Frequency
 		freq = cfg["frequency"]
 		if not (isinstance(freq, int) or isinstance(freq, float)):
-			raise TypeError(f"'{name}.frequency' 必须是数值类型，收到 {type(freq).__name__}")
+			raise TypeError(f"'{name}.frequency' must be a numeric type, got {type(freq).__name__}")
 		if freq <= 0:
-			raise ValueError(f"'{name}.frequency' 必须大于 0，收到 {freq}")
+			raise ValueError(f"'{name}.frequency' must be greater than 0, got {freq}")
 
-		# 循环重置周期
+		# Number of reset cycles
 		num_reset = cfg["num_cycles_to_reset"]
 		if not isinstance(num_reset, int) or num_reset < 0:
-			raise ValueError(f"'{name}.num_cycles_to_reset' 必须是非负整数，收到 {num_reset}")
+			raise ValueError(f"'{name}.num_cycles_to_reset' must be a non-negative integer, got {num_reset}")
 
-		# 空闲状态
+		# Idle state
 		idle = cfg["reset_idle_state"]
 		valid_idle_strs = ("initial", "low", "high", "z")
 		if not (isinstance(idle, str) and idle.lower() in valid_idle_strs):
 			raise ValueError(
-			f"'{name}.reset_idle_state' 必须是 'initial'、'low'、'high'、'z' 之一，收到 {idle!r}"
+			f"'{name}.reset_idle_state' must be one of 'initial', 'low', 'high', 'z', got {idle!r}"
 			)
 
-		# 重复次数
+		# Repeats
 		repeats = cfg["repeats"]
 		if not isinstance(repeats, int) or repeats <= 0:
-			raise ValueError(f"'{name}.repeats' 必须是正整数，收到 {repeats}")
+			raise ValueError(f"'{name}.repeats' must be a positive integer, got {repeats}")
 
-		# 数据长度与实际 data 对象校验
+		# Data length and actual data object validation
 		length = cfg["length_of_data"]
 		if not isinstance(length, int) or length < 0:
-			raise ValueError(f"'{name}.length_of_data' 必须是非负整数，收到 {length}")
+			raise ValueError(f"'{name}.length_of_data' must be a non-negative integer, got {length}")
 		data = cfg["data"]
 		if not isinstance(data, dict):
-			raise TypeError(f"'{name}.data' 必须是 dict，收到 {type(data).__name__}")
+			raise TypeError(f"'{name}.data' must be dict, got {type(data).__name__}")
 		if len(data) != length:
-			raise ValueError(f"'{name}.data' 长度 {len(data)} 与 length_of_data {length} 不匹配")
-		# data 中的值校验
+			raise ValueError(f"'{name}.data' length {len(data)} does not match length_of_data {length}")
+		# Validate values in data
 		for val in data.values():
 			if val not in (0, 1):
-				raise ValueError(f"'{name}.data' 中的值只能是 0 或 1，收到 {val}")
+				raise ValueError(f"Values in '{name}.data' can only be 0 or 1, got {val}")
 
 def write_to_device(device):
 	# configurations
@@ -89,10 +89,10 @@ def write_to_device(device):
 	try:
 		configs_sanity_check(configs)
 	except (TypeError, KeyError, ValueError) as e:
-		print(f"\033[91mJson 文件出错啦！ {e}\033[0m")
+		print(f"\033[91mJson file error! {e}\033[0m")
 		return
-	"""将配置写入设备"""
-	# setup digital output
+	"""Write configuration to device"""
+	# Set up digital output
 	pattern = device.digital_output
 	device.supplies.digital.voltage = supply_voltage
 	for key, config in configs.items():
